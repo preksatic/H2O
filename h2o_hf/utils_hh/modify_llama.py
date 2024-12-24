@@ -45,6 +45,7 @@ class LlamaAttention_heavy_hitter(nn.Module):
 
         self.heavy_budget_ratio = config.heavy_ratio
         self.recent_budget_ratio = config.recent_ratio
+        self.random_small_cache = config.random_small_cache
         self.attention_masks_next = None 
         self.heavy_budget = None
         self.recent_budget = None
@@ -153,7 +154,14 @@ class LlamaAttention_heavy_hitter(nn.Module):
                 selected_set = self.previous_scores
 
             if not self.heavy_budget == 0:
-                _, keep_topk = selected_set.topk(k=self.heavy_budget, dim=-1, largest=True)
+                if self.random_small_cache:
+                    num_heads, num_tokens = selected_set.shape
+                    keep_topk = torch.stack([
+                        torch.randperm(num_tokens)[:3] 
+                        for _ in range(num_heads)
+                    ])
+                else:
+                    _, keep_topk = selected_set.topk(k=self.heavy_budget, dim=-1, largest=True)
                 attn_mask = attn_mask.scatter(-1, keep_topk, 1)
 
         self.attention_masks_next = attn_mask.clone().unsqueeze(0).unsqueeze(2)

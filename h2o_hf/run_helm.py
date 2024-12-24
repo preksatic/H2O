@@ -123,6 +123,7 @@ def main():
     parser.add_argument("--heavy_ratio", type=float, default=0.1)
     parser.add_argument("--recent_ratio", type=float, default=0.1)
     parser.add_argument('--enable_small_cache', action='store_true')
+    parser.add_argument('--random_small_cache', action='store_true')
 
     parser.add_argument("--sample_num", type=int, default=1000)
 
@@ -154,6 +155,7 @@ def main():
         print('Enable Small Cache Size')
         config.heavy_ratio = args.heavy_ratio
         config.recent_ratio = args.recent_ratio
+        config.random_small_cache = args.random_small_cache
         checkpoint = copy.deepcopy(model.state_dict())
         model = ENABLE_Heavy_Hitter_FUNCTIONS[args.model_arch](model, config)
         model.load_state_dict(checkpoint)
