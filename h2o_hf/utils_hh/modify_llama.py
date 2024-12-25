@@ -159,7 +159,7 @@ class LlamaAttention_heavy_hitter(nn.Module):
                     keep_topk = torch.stack([
                         torch.randperm(num_tokens)[:3] 
                         for _ in range(num_heads)
-                    ])
+                    ]).to(attn_weights_devices)
                 else:
                     _, keep_topk = selected_set.topk(k=self.heavy_budget, dim=-1, largest=True)
                 attn_mask = attn_mask.scatter(-1, keep_topk, 1)
