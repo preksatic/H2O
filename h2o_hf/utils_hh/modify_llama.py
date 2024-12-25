@@ -157,7 +157,7 @@ class LlamaAttention_heavy_hitter(nn.Module):
                 if self.random_small_cache:
                     num_heads, num_tokens = selected_set.shape
                     keep_topk = torch.stack([
-                        torch.randperm(num_tokens)[:3] 
+                        torch.randperm(num_tokens)[:self.heavy_budget] 
                         for _ in range(num_heads)
                     ]).to(attn_weights_devices)
                 else:
