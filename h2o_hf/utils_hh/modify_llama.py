@@ -124,7 +124,7 @@ class LlamaAttention_heavy_hitter(nn.Module):
         # offset = attn_weights.gt(0).sum(0).sum(1)
         if self.random_small_cache:
             num_head, k_token = current_scores_sum.shape
-            perms = torch.argsort(torch.rand(num_head, k_token), dim=-1)
+            perms = torch.argsort(torch.rand(num_head, k_token), dim=-1).to(attn_weights.device)
             current_scores_sum = current_scores_sum.gather(1, perms)
 
         # Accumulate attention scores
