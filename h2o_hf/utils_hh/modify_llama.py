@@ -122,6 +122,10 @@ class LlamaAttention_heavy_hitter(nn.Module):
         # attn_weights (BS, heads, q-tokens, k-tokens) 16, 15, 15 // 16, 1, 16
         current_scores_sum = attn_weights.sum(0).sum(1) # (heads, k-tokens)
         # offset = attn_weights.gt(0).sum(0).sum(1)
+        if self.random_small_cache:
+            num_head, k_token = current_scores_sum.shape
+            perms = torch.argsort(torch.rand(num_head, k_token), dim=-1)
+            current_scores_sum = current_scores_sum.gather(1, perms)
 
         # Accumulate attention scores
         if not self.previous_scores == None:
@@ -154,14 +158,7 @@ class LlamaAttention_heavy_hitter(nn.Module):
                 selected_set = self.previous_scores
 
             if not self.heavy_budget == 0:
-                if self.random_small_cache:
-                    num_heads, num_tokens = selected_set.shape
-                    keep_topk = torch.stack([
-                        torch.randperm(num_tokens)[:self.heavy_budget] 
-                        for _ in range(num_heads)
-                    ]).to(attn_weights_devices)
-                else:
-                    _, keep_topk = selected_set.topk(k=self.heavy_budget, dim=-1, largest=True)
+                _, keep_topk = selected_set.topk(k=self.heavy_budget, dim=-1, largest=True)
                 attn_mask = attn_mask.scatter(-1, keep_topk, 1)
 
         self.attention_masks_next = attn_mask.clone().unsqueeze(0).unsqueeze(2)

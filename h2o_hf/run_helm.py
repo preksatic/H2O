@@ -207,6 +207,7 @@ def main():
             generate_text = tokenizer.decode(output_sequences['sequences'].squeeze(0)[len(input_ids[0]):])
             generate_text = generate_text[: generate_text.find(stop[0])]
 
+            print(generate_text)
             result['result'] = {
                 "choices": [
                     {
