@@ -111,6 +111,7 @@ class LlamaAttention_heavy_hitter(nn.Module):
 
 
         if self.attention_masks_next is not None:
+            self.attention_masks_next[:, :, :, :4] = 1
             attn_weights = attn_weights * self.attention_masks_next + (1 - self.attention_masks_next) * torch.finfo(attn_weights.dtype).min
 
         # upcast attention to fp32
